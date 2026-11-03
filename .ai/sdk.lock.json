@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "sdkVersion": "0.1.0",
+  "channel": "stable",
+  "source": "bundled@0.1.0",
+  "contentSchemaVersion": 1,
+  "adoptedAt": "2026-11-03T12:24:45.966Z",
+  "files": {
+    ".ai/sdk/INSTRUCOES.md": "72e103d2d69de2f9cb87ef4ddf75b90c8cbaa9db3c555d4b269b0e203ea65ef4",
+    ".ai/sdk/requisitos.json": "55a9e7bc6babb2949c6acbb35a002dfe0bbfb4a19fe11400c90736f52f6039e3"
+  },
+  "blocks": {
+    "AGENTS.md": "be8f762e7ca796fb2d0a703e9e6e6b8a13aabd23ea5b66d0e16f3f4b9a8e5f5e"
+  },
+  "integrations": {
+    "claude": false,
+    "githubWorkflows": false
+  }
+}

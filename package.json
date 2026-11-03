@@ -1,0 +1,57 @@
+{
+  "name": "@tassiopereira/repoguide",
+  "version": "0.1.0",
+  "description": "Guidance for AI-assisted development and persistent tracking of engineering requirements in your repositories.",
+  "license": "MIT",
+  "author": "tassiopereira",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tassiopereira/RepoGuide.git"
+  },
+  "homepage": "https://github.com/tassiopereira/RepoGuide#readme",
+  "bugs": {
+    "url": "https://github.com/tassiopereira/RepoGuide/issues"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "agents-md",
+    "requirements",
+    "cli",
+    "github"
+  ],
+  "type": "module",
+  "bin": {
+    "repoguide": "build/src/bin.js"
+  },
+  "files": [
+    "build/src",
+    "content",
+    "README.md",
+    "README.pt-BR.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "npm run build && node --test --test-reporter=spec \"build/test/**/*.test.js\"",
+    "test:pack": "node scripts/pack-test.mjs",
+    "release:assets": "node scripts/make-release-assets.mjs",
+    "dogfood": "node build/src/bin.js check -C ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

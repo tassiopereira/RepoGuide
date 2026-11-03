@@ -1,0 +1,24 @@
+name: Problema
+description: Algo não funciona como documentado.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: O que aconteceu
+      description: Comando executado, saída e código de saída. Remova dados sensíveis.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: O que era esperado
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Ambiente
+      description: Saída de `repoguide --version`, `node --version` e sistema operacional.
+    validations:
+      required: true

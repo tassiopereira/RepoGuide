@@ -1,0 +1,3 @@
+# Proprietário e mantenedor inicial. CODEOWNERS só define revisores; a restrição de escrita
+# vem das permissões do repositório e dos rulesets (veja docs/maintainers/repository-settings.md).
+* @tassiopereira
