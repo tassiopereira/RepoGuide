@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "0.1.0",
+  "language": "pt-BR",
+  "requirements": [
+    {
+      "id": "RG-OBS-001",
+      "revision": 1,
+      "materialRevision": 1,
+      "title": "Monitoramento de erros em produção",
+      "description": "Erros não tratados em produção devem ser capturados por uma ferramenta de monitoramento, identificados por ambiente e versão, e gerar alertas encaminhados a alguém responsável.",
+      "category": "observabilidade",
+      "introducedIn": "0.1.0",
+      "scopeLevel": "application",
+      "applicability": {
+        "summary": "Aplicações que executam em produção (serviços, sites, apps, jobs). Bibliotecas e ferramentas sem execução própria em produção podem ser declaradas não aplicáveis.",
+        "default": "applicable"
+      },
+      "acceptanceCriteria": [
+        { "id": "sdk", "text": "Ferramenta de monitoramento de erros incluída nas dependências da aplicação.", "evidence": "static" },
+        { "id": "init", "text": "Inicialização da ferramenta presente no código de inicialização da aplicação.", "evidence": "static" },
+        { "id": "env-release", "text": "Eventos identificam ambiente (ex.: production, staging) e versão/release.", "evidence": "operational" },
+        { "id": "capture", "text": "Um erro de teste em ambiente real foi capturado pela ferramenta.", "evidence": "operational" },
+        { "id": "alerts", "text": "Alertas são encaminhados a um responsável (canal, e-mail ou plantão).", "evidence": "operational" }
+      ],
+      "suggestedTools": ["Sentry"],
+      "acceptedEquivalents": ["Bugsnag", "Rollbar", "Honeybadger", "Datadog APM/RUM", "New Relic", "Elastic APM", "AppSignal", "Raygun", "Airbrake", "Highlight", "solução própria com captura, contexto e alertas equivalentes"],
+      "severity": "high",
+      "blocking": false,
+      "verification": {
+        "checker": "error-monitoring",
+        "summary": "Indícios estáticos: dependência conhecida nos manifestos e chamada de inicialização no código. Captura real, ambiente/versão nos eventos e alertas não são verificáveis localmente: exigem declaração humana com validade (repoguide requirement attest). A dependência instalada sozinha nunca conta como atendimento."
+      },
+      "guidance": [
+        "Inicialize a ferramenta o mais cedo possível no ciclo de vida da aplicação.",
+        "Configure ambiente e versão a partir de variáveis do deploy (ex.: SENTRY_ENVIRONMENT, SENTRY_RELEASE ou equivalente).",
+        "Não envie dados pessoais sensíveis; revise filtros/scrubbing.",
+        "Provoque um erro de teste controlado em staging e confirme o alerta antes de declarar evidência."
+      ],
+      "decisionPolicy": { "onMaterialRevision": "require-review", "maxWaiverDays": 365, "maxDeferralDays": 180 }
+    },
+    {
+      "id": "RG-PRD-001",
+      "revision": 1,
+      "materialRevision": 1,
+      "title": "Análise de uso ou público",
+      "description": "Produtos com público devem medir uso de forma proporcional e respeitando privacidade e consentimento, para orientar decisões. O RepoGuide nunca adiciona rastreamento automaticamente.",
+      "category": "produto",
+      "introducedIn": "0.1.0",
+      "scopeLevel": "application",
+      "applicability": {
+        "summary": "Depende do produto: aplica-se a interfaces com público (sites, apps). APIs internas, bibliotecas e ferramentas sem público costumam ser não aplicáveis — registre a decisão.",
+        "default": "depends"
+      },
+      "acceptanceCriteria": [
+        { "id": "tool", "text": "Ferramenta de análise de uso integrada à interface.", "evidence": "static" },
+        { "id": "data", "text": "Dados de uso chegam à ferramenta em produção.", "evidence": "operational" },
+        { "id": "privacy", "text": "Coleta compatível com a política de privacidade e consentimento aplicáveis.", "evidence": "human" }
+      ],
+      "suggestedTools": ["Google Analytics"],
+      "acceptedEquivalents": ["Plausible", "Matomo", "Umami", "Fathom", "PostHog", "Mixpanel", "Amplitude", "Segment", "Vercel Analytics", "Cloudflare Web Analytics", "Application Insights", "logs de acesso agregados com análise equivalente"],
+      "severity": "medium",
+      "blocking": false,
+      "verification": {
+        "checker": "analytics",
+        "summary": "Indícios estáticos: dependência ou trecho de script conhecido. Sem sinal de interface pública e sem ferramenta, o resultado é desconhecido (aplicabilidade indeterminada), nunca atendido. Recebimento real de dados e privacidade exigem declaração humana."
+      },
+      "guidance": [
+        "Escolha a ferramenta mais simples que responda às perguntas do produto.",
+        "Prefira opções sem cookies ou com consentimento explícito quando exigido.",
+        "Não adicione rastreamento sem decisão do responsável pelo produto."
+      ],
+      "decisionPolicy": { "onMaterialRevision": "require-review", "maxWaiverDays": null, "maxDeferralDays": 180 }
+    },
+    {
+      "id": "RG-DEP-001",
+      "revision": 1,
+      "materialRevision": 1,
+      "title": "Atualização automatizada de dependências",
+      "description": "O repositório deve ter atualização automatizada de dependências cobrindo todos os ecossistemas usados, e essa automação deve estar de fato executando.",
+      "category": "manutenção",
+      "introducedIn": "0.1.0",
+      "scopeLevel": "repository",
+      "applicability": {
+        "summary": "Repositórios com dependências gerenciadas (npm, pip, Go, Maven, Docker, GitHub Actions etc.).",
+        "default": "applicable"
+      },
+      "acceptanceCriteria": [
+        { "id": "config", "text": "Configuração de Dependabot ou Renovate versionada.", "evidence": "static" },
+        { "id": "coverage", "text": "A configuração cobre todos os ecossistemas detectados no repositório.", "evidence": "static" },
+        { "id": "running", "text": "A automação executa remotamente (ex.: PRs de atualização recentes).", "evidence": "operational" }
+      ],
+      "suggestedTools": ["Dependabot"],
+      "acceptedEquivalents": ["Renovate", "ferramenta equivalente com PRs automáticos de atualização"],
+      "severity": "medium",
+      "blocking": false,
+      "verification": {
+        "checker": "dependency-updates",
+        "summary": "Lê .github/dependabot.yml ou configuração do Renovate e compara com os ecossistemas detectados (varredura limitada). Execução remota é comprovada por PRs do bot nos últimos 90 dias via API pública do GitHub (cache de 24 h); o arquivo de configuração sozinho não comprova execução."
+      },
+      "guidance": [
+        "Inclua github-actions entre os ecossistemas se o repositório tiver workflows.",
+        "Agrupe atualizações menores para reduzir ruído; mantenha atualizações de segurança separadas.",
+        "Se nenhum PR recente existir porque tudo está atualizado, confirme com repoguide requirement attest."
+      ],
+      "decisionPolicy": { "onMaterialRevision": "require-review", "maxWaiverDays": 365, "maxDeferralDays": 90 }
+    },
+    {
+      "id": "RG-GOV-001",
+      "revision": 1,
+      "materialRevision": 1,
+      "title": "Novas funcionalidades entregues por pull request",
+      "description": "Novas funcionalidades devem chegar à branch principal por pull request revisável. A orientação escrita para IA e a proteção aplicada no GitHub são evidências distintas; ambas são necessárias.",
+      "category": "governança",
+      "introducedIn": "0.1.0",
+      "scopeLevel": "repository",
+      "applicability": {
+        "summary": "Todo repositório versionado com colaboração ou uso de IA.",
+        "default": "applicable"
+      },
+      "acceptanceCriteria": [
+        { "id": "guidance", "text": "Orientação escrita no AGENTS.md para trabalhar em branch e entregar via PR.", "evidence": "static" },
+        { "id": "protection", "text": "Branch principal exige pull request (ruleset ou proteção de branch) no GitHub.", "evidence": "operational" }
+      ],
+      "suggestedTools": ["GitHub rulesets"],
+      "acceptedEquivalents": ["proteção de branch clássica do GitHub", "regras equivalentes em outra plataforma (declaradas com attest)"],
+      "severity": "high",
+      "blocking": false,
+      "verification": {
+        "checker": "pr-workflow",
+        "summary": "Estático: bloco RepoGuide íntegro no AGENTS.md com orientação de PR. Operacional: consulta GET /repos/{owner}/{repo}/rules/branches/{branch} (pública) e, se possível, a proteção clássica. Sem acesso remoto, o resultado é desconhecido; a orientação escrita sozinha não comprova proteção."
+      },
+      "guidance": [
+        "Crie um ruleset para a branch padrão exigindo pull request e checks de status.",
+        "Em repositórios com um único mantenedor, evite exigir aprovação que ele não possa dar ao próprio PR; use exceção restrita ao administrador apenas via PR.",
+        "Bloqueie force push e exclusão da branch principal."
+      ],
+      "decisionPolicy": { "onMaterialRevision": "require-review", "maxWaiverDays": 180, "maxDeferralDays": 90 }
+    }
+  ]
+}

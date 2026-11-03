@@ -1,0 +1,34 @@
+# Gerenciado pelo RepoGuide {{VERSION}}. Alterações locais bloqueiam `repoguide update`.
+# Check de requisitos em PRs. Somente leitura: não executa código do projeto, não usa secrets,
+# funciona com PRs de forks (o evento pull_request recebe token somente leitura).
+name: RepoGuide check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repoguide-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Instalar RepoGuide
+        env:
+          # Defina a variável de repositório REPOGUIDE_PACKAGE para usar outra origem
+          # (ex.: @tassiopereira/repoguide@{{VERSION}} quando publicado no npm).
+          REPOGUIDE_PACKAGE: ${{ vars.REPOGUIDE_PACKAGE || 'https://github.com/tassiopereira/RepoGuide/releases/download/v{{VERSION}}/tassiopereira-repoguide-{{VERSION}}.tgz' }}
+        run: npm install --global --no-audit --no-fund "$REPOGUIDE_PACKAGE"
+      - name: repoguide check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FAIL_ON: ${{ vars.REPOGUIDE_FAIL_ON || 'blocking' }}
+        run: repoguide check --fail-on "$FAIL_ON"

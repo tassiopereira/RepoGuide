@@ -1,0 +1,59 @@
+# Gerenciado pelo RepoGuide {{VERSION}}. Alterações locais bloqueiam `repoguide update`.
+# Consulta periódica de novas versões (PR de atualização, nunca merge automático) e,
+# opcionalmente, acompanhamento de requisitos em issues. Roda só na branch padrão
+# (schedule/workflow_dispatch); nunca em PRs nem com código de forks.
+name: RepoGuide maintenance
+
+on:
+  schedule:
+    - cron: "23 9 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  REPOGUIDE_PACKAGE: ${{ vars.REPOGUIDE_PACKAGE || 'https://github.com/tassiopereira/RepoGuide/releases/download/v{{VERSION}}/tassiopereira-repoguide-{{VERSION}}.tgz' }}
+
+jobs:
+  update-pr:
+    # Requer: Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests".
+    # PRs abertos com GITHUB_TOKEN não disparam outros workflows; feche e reabra o PR para rodar o CI.
+    if: vars.REPOGUIDE_UPDATE_PR != 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm install --global --no-audit --no-fund "$REPOGUIDE_PACKAGE"
+      - name: Abrir PR de atualização (se houver nova versão)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: repoguide github update-pr
+
+  sync-issues:
+    # Opt-in: defina a variável de repositório REPOGUIDE_SYNC_ISSUES=true.
+    if: vars.REPOGUIDE_SYNC_ISSUES == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm install --global --no-audit --no-fund "$REPOGUIDE_PACKAGE"
+      - name: Sincronizar issues de requisitos
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: repoguide github sync-issues

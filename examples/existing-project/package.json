@@ -1,0 +1,10 @@
+{
+  "name": "loja-exemplo",
+  "private": true,
+  "version": "1.4.0",
+  "dependencies": {
+    "@sentry/react": "^8.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  }
+}

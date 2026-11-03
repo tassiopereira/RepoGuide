@@ -1,0 +1,88 @@
+# Publicação oficial. Disparada apenas por tags v*.*.* (criação restrita ao proprietário por
+# ruleset de tags). A publicação no GitHub passa pelo environment "release" (aprovação manual);
+# a publicação no npm é opcional, desligada por padrão e usa trusted publishing (OIDC).
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:pack
+      - name: Tag corresponde à versão do package.json
+        env:
+          TAG: ${{ github.ref_name }}
+        run: test "$TAG" = "v$(node -p "require('./package.json').version")"
+      - name: Índice anterior do canal estável (se existir)
+        env:
+          REPO: ${{ github.repository }}
+        run: curl -fsSL "https://github.com/$REPO/releases/latest/download/stable.json" -o previous-stable.json || echo "Nenhuma release anterior."
+      - run: npm run release:assets -- --previous-index previous-stable.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-assets
+          path: .release/
+          if-no-files-found: error
+
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-assets
+          path: .release
+      - name: Criar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          flags=""
+          case "$TAG" in *-*) flags="--prerelease";; esac
+          gh release create "$TAG" .release/* --repo "$REPO" --verify-tag --title "$TAG" --generate-notes $flags
+
+  npm-publish:
+    # Desligado por padrão. Para ativar: configure trusted publishing no npm para este
+    # repositório/workflow, crie o environment "npm" com aprovação e defina vars.NPM_PUBLISH=true.
+    if: vars.NPM_PUBLISH == 'true' && !contains(github.ref_name, '-')
+    needs: github-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-assets
+          path: .release
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm publish .release/tassiopereira-repoguide-*.tgz --access public --provenance
