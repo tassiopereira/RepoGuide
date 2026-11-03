@@ -112,5 +112,5 @@ The name in `--by` is a declaration, not authentication: governance happens in G
 ## Documentation
 
 - Users: [commands](docs/usage/commands.md) · [requirements & decisions](docs/usage/requirements.md) · [updates](docs/usage/updates.md) · [GitHub integration](docs/usage/github.md) · [AI tools](docs/usage/ai-tools.md) · [examples](examples/)
-- Maintainers: [development](docs/maintainers/development.md) · [releasing](docs/maintainers/releasing.md) · [repository settings](docs/maintainers/repository-settings.md)
+- Maintainers: [development](docs/maintainers/development.md) · [releasing](docs/maintainers/releasing.md) · [repository settings](docs/maintainers/repository-settings.md) · [kit migration (pending)](docs/maintainers/content-migration.md)
 - [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [License (MIT)](LICENSE)
